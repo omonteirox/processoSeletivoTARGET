@@ -1,38 +1,44 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 import 'dart:io';
 
 void main() {
-  final file = File('questao3/faturamento.json');
-  final jsonString = file.readAsStringSync();
-  final data = json.decode(jsonString);
-  final faturamento = List<double>.from(data['faturamento']);
+  final file = File('questao3/dados.json');
+  final jsonData = json.decode(file.readAsStringSync());
   double menorValor = double.infinity;
   double maiorValor = -double.infinity;
   double totalFaturado = 0.0;
-  int diasComFaturamento = 0;
-  for (var valor in faturamento) {
-    if (valor > maiorValor) {
-      maiorValor = valor;
+  int diasAcimaDaMedia = 0;
+  for (final item in jsonData) {
+    final valor = item['valor'] as double;
+
+    if (valor == 0) {
+      continue;
     }
+
     if (valor < menorValor) {
       menorValor = valor;
     }
-    if (valor > 0.0) {
-      totalFaturado += valor;
-      diasComFaturamento++;
-    }
-  }
-  double mediaFaturada = totalFaturado / diasComFaturamento;
 
-  int diasAcimaDaMedia = 0;
-  for (var valor in faturamento) {
-    if (valor > mediaFaturada) {
+    if (valor > maiorValor) {
+      maiorValor = valor;
+    }
+
+    totalFaturado += valor;
+  }
+  final diasFaturamento = jsonData.length;
+  final diasUteis =
+      DateTime(DateTime.now().year, DateTime.now().month + 1, 0).weekday - 1;
+  final diasSemFaturamento = diasUteis - diasFaturamento;
+  final mediaMensal = totalFaturado / diasFaturamento;
+  for (final item in jsonData) {
+    final valor = item['valor'] as double;
+    if (valor > mediaMensal) {
       diasAcimaDaMedia++;
     }
   }
-  print("O menor valor faturado foi de $menorValor");
-  print("O maior valor faturado foi de $maiorValor");
-  print("A quantidade de dias com faturamento foi de $diasComFaturamento");
-  print("A média faturada foi de  $mediaFaturada");
-  print("Os dias com o fatuamento acima da média  $diasAcimaDaMedia");
+
+  print('Menor valor de faturamento: R\$ ${menorValor.toStringAsFixed(2)}');
+  print('Maior valor de faturamento: R\$ ${maiorValor.toStringAsFixed(2)}');
+  print('Dias com faturamento acima da média: $diasAcimaDaMedia');
 }
